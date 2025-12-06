@@ -35,39 +35,35 @@ jobs:
           sudo git clone --recursive https://github.com/theos/theos.git /opt/theos
         fi
         
-        # Download iOS SDKs
-        echo "📥 Downloading iOS SDKs..."
-        sudo mkdir -p /opt/theos/sdks
-        cd /opt/theos/sdks
+        # Download iOS SDKs - Use full archive approach
+        echo "📥 Downloading iOS SDKs from theos/sdks repository..."
+        cd /opt/theos
         
-        # Download specific iOS SDK 14.5 (more stable for this codebase)
-        echo "Downloading iOS 14.5 SDK..."
-        cd /opt/theos/sdks
-        sudo curl -LO https://github.com/theos/sdks/releases/download/master/iPhoneOS14.5.sdk.tar.xz || {
-          echo "Failed to download from releases, trying archive..."
-          sudo curl -LO https://github.com/theos/sdks/archive/refs/heads/master.zip
-          sudo unzip -q master.zip
-          sudo mv sdks-master/* .
-          sudo rm -rf sdks-master master.zip
-        }
+        # Download full SDKs archive
+        sudo curl -LO https://github.com/theos/sdks/archive/refs/heads/master.zip
+        sudo unzip -q master.zip
         
-        # Extract if tar.xz was downloaded
-        if [ -f "iPhoneOS14.5.sdk.tar.xz" ]; then
-          sudo tar -xf iPhoneOS14.5.sdk.tar.xz
-          sudo rm iPhoneOS14.5.sdk.tar.xz
+        # Move SDKs to correct location
+        if [ -d "sdks-master" ]; then
+          sudo rm -rf sdks
+          sudo mv sdks-master sdks
+          echo "✅ SDKs moved to /opt/theos/sdks"
         fi
+        
+        sudo rm -f master.zip
         
         # Verify installation
         echo "✅ Theos installed at: /opt/theos"
         echo "Available SDKs:"
-        ls -la /opt/theos/sdks/
+        ls -la /opt/theos/sdks/ | grep -i "iphone" || ls -la /opt/theos/sdks/
         
         # Check available SDKs
         if ls /opt/theos/sdks/iPhoneOS*.sdk 1> /dev/null 2>&1; then
-          echo "✅ iOS SDK found:"
-          ls -d /opt/theos/sdks/iPhoneOS*.sdk
+          echo "✅ iOS SDKs found:"
+          ls -d /opt/theos/sdks/iPhoneOS*.sdk | head -5
         else
-          echo "⚠️ No iOS SDK found!"
+          echo "⚠️ No iOS SDK found, listing all:"
+          ls -la /opt/theos/sdks/
         fi
         
         # Install ldid (for code signing)
