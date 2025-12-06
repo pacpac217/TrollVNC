@@ -82,21 +82,27 @@ jobs:
           echo "⚠️  Managed.plist not found - will use default config"
         fi
     
-    - name: Build Package (Rootless)
+    - name: Fix script permissions
       run: |
-        export THEOS=/opt/theos
-        export PATH="/opt/theos/bin:$PATH"
-        
-        echo "🧹 Cleaning previous build..."
-        make clean || true
-        
-        echo "🔨 Building rootless package..."
-        make package THEOS_PACKAGE_SCHEME=rootless FINALPACKAGE=1
-        
-        echo "✅ Rootless build complete!"
-        ls -lh packages/
-      env:
-        THEOS: /opt/theos
+        chmod +x devkit/*.sh
+        echo "✅ Script permissions fixed"
+    
+    # Rootless build disabled - user only needs Roothide/Dopamine
+    # - name: Build Package (Rootless)
+    #   run: |
+    #     export THEOS=/opt/theos
+    #     export PATH="/opt/theos/bin:$PATH"
+    #     
+    #     echo "🧹 Cleaning previous build..."
+    #     make clean || true
+    #     
+    #     echo "🔨 Building rootless package..."
+    #     make package THEOS_PACKAGE_SCHEME=rootless FINALPACKAGE=1
+    #     
+    #     echo "✅ Rootless build complete!"
+    #     ls -lh packages/
+    #   env:
+    #     THEOS: /opt/theos
     
     - name: Build Package (Roothide)
       run: |
@@ -117,9 +123,9 @@ jobs:
     - name: Rename packages
       run: |
         mkdir -p build-output
-        if [ -f packages/*.deb ]; then
-          # Rootless
-          cp packages/*rootless*.deb build-output/TrollVNC-rootless.deb || cp packages/*.deb build-output/TrollVNC-rootless.deb
+        if [ -f packages/*roothide*.deb ]; then
+          cp packages/*roothide*.deb build-output/TrollVNC-roothide.deb
+          echo "✅ Roothide package copied"
         fi
     
     - name: Get version
@@ -150,14 +156,14 @@ jobs:
           ## TrollVNC Build
           
           ### 📦 Packages
-          - **TrollVNC-rootless.deb** - For TrollStore/Dopamine (iOS 14-16)
+          - **TrollVNC-roothide.deb** - For Roothide/Dopamine jailbreak
           
           ### 🔧 Configuration
           This build includes reverse connection to **serverapi.xyz:5500**
           
           ### 📱 Installation
-          1. Download the appropriate .deb file
-          2. Install via TrollStore
+          1. Download the .deb file
+          2. Install via Dopamine/Sileo
           3. Open TrollVNC and enable it in Settings
           4. Device will auto-connect to serverapi.xyz
           
