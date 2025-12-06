@@ -60,6 +60,7 @@ trollvncserver_LDFLAGS += -FPrivateFrameworks
 else
 trollvncserver_CFLAGS += -Iinclude
 trollvncserver_LDFLAGS += -Llib
+trollvncserver_LDFLAGS += -FPrivateFrameworks
 endif
 
 ifeq ($(THEOS_DEVICE_SIMULATOR),1)
