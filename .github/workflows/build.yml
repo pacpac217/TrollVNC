@@ -115,7 +115,8 @@ jobs:
     - name: Fix script permissions
       run: |
         chmod +x devkit/*.sh
-        echo "✅ Script permissions fixed"
+        chmod +x layout/DEBIAN/postinst layout/DEBIAN/prerm
+        echo "✅ Script permissions fixed (devkit scripts and DEBIAN maintainer scripts)"
     
     # Rootless build disabled - user only needs Roothide/Dopamine
     # - name: Build Package (Rootless)

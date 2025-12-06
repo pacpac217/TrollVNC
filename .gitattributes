@@ -1,0 +1,8 @@
+# Maintainer scripts need execute permissions
+layout/DEBIAN/postinst text eol=lf
+layout/DEBIAN/prerm text eol=lf
+
+# Shell scripts
+*.sh text eol=lf
+devkit/*.sh text eol=lf
+
