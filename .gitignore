@@ -5,7 +5,7 @@ obj/
 *.deb
 *.dylib
 *.o
-*.a
+# *.a  # Commented out - we need precompiled .a libraries in lib/ folder
 
 # Node.js
 node_modules/
@@ -51,5 +51,6 @@ Desktop.ini
 $RECYCLE.BIN/
 
 # Library files (binary)
-lib/*.a
-lib-simulator/*.a
+# IMPORTANT: These precompiled libraries are needed for building
+# lib/*.a
+# lib-simulator/*.a
