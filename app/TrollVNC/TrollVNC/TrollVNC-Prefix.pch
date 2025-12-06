@@ -1,0 +1,14 @@
+//
+// Prefix header for all source files of the 'TrollVNC' target
+//
+
+#ifdef __OBJC__
+    #import <Foundation/Foundation.h>
+    
+    // UIKit workaround for SDK compatibility
+    // Fix UIAccessibilityTraits type conflicts with newer SDKs
+    #ifndef UIAccessibilityTraits
+    typedef uint64_t UIAccessibilityTraits;
+    #endif
+#endif
+

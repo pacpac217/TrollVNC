@@ -18,6 +18,12 @@
 #import <Foundation/Foundation.h>
 #import <Preferences/PSSpecifier.h>
 #import <SystemConfiguration/SystemConfiguration.h>
+
+// UIKit workaround for SDK compatibility
+#ifndef UIAccessibilityTraits
+typedef uint64_t UIAccessibilityTraits;
+#endif
+
 #import <UIKit/UIKit.h>
 #import <arpa/inet.h>
 #import <dlfcn.h>
