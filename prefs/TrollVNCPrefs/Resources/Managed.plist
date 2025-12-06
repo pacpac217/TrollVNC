@@ -10,14 +10,16 @@
     <key>DesktopName</key>
     <string>My iPhone</string>
     
-    <!-- Reverse Connection Configuration -->
-    <!-- Mode: "viewer" = direct reverse, "repeater" = UltraVNC repeater mode -->
-    <key>ReverseMode</key>
-    <string>viewer</string>
+    <!-- Direct Connection Configuration (No Reverse) -->
+    <!-- Port: Fixed port for direct VNC connection (5901 = default, or use different port per device) -->
+    <key>Port</key>
+    <integer>5901</integer>
     
-    <!-- Server address: serverapi.xyz -->
-    <key>ReverseSocket</key>
-    <string>serverapi.xyz:5500</string>
+    <!-- Disable Reverse Connection (comment out or remove ReverseMode/ReverseSocket) -->
+    <!-- <key>ReverseMode</key> -->
+    <!-- <string>viewer</string> -->
+    <!-- <key>ReverseSocket</key> -->
+    <!-- <string>serverapi.xyz:5500</string> -->
     
     <!-- Performance Settings -->
     <key>Scale</key>
