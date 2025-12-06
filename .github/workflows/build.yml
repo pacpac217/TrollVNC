@@ -58,8 +58,9 @@ jobs:
         
         sudo rm -f master.zip
         
-        # Copy SDKs to theos-roothide
-        if [ -d "/opt/theos-roothide" ] && [ ! -d "/opt/theos-roothide/sdks" ]; then
+        # Copy SDKs to theos-roothide (force copy to ensure they exist)
+        if [ -d "/opt/theos-roothide" ]; then
+          sudo rm -rf /opt/theos-roothide/sdks
           sudo cp -r /opt/theos/sdks /opt/theos-roothide/
           echo "✅ SDKs copied to /opt/theos-roothide/sdks"
         fi
@@ -67,16 +68,27 @@ jobs:
         # Verify installation
         echo "✅ Theos installed at: /opt/theos"
         echo "✅ Theos-Roothide installed at: /opt/theos-roothide"
-        echo "Available SDKs:"
+        echo "Available SDKs in /opt/theos/sdks:"
         ls -la /opt/theos/sdks/ | grep -i "iphone" || ls -la /opt/theos/sdks/
+        
+        echo "Available SDKs in /opt/theos-roothide/sdks:"
+        ls -la /opt/theos-roothide/sdks/ | grep -i "iphone" || ls -la /opt/theos-roothide/sdks/
         
         # Check available SDKs
         if ls /opt/theos/sdks/iPhoneOS*.sdk 1> /dev/null 2>&1; then
-          echo "✅ iOS SDKs found:"
+          echo "✅ iOS SDKs found in theos:"
           ls -d /opt/theos/sdks/iPhoneOS*.sdk | head -5
         else
-          echo "⚠️ No iOS SDK found, listing all:"
+          echo "⚠️ No iOS SDK found in theos, listing all:"
           ls -la /opt/theos/sdks/
+        fi
+        
+        if ls /opt/theos-roothide/sdks/iPhoneOS*.sdk 1> /dev/null 2>&1; then
+          echo "✅ iOS SDKs found in theos-roothide:"
+          ls -d /opt/theos-roothide/sdks/iPhoneOS*.sdk | head -5
+        else
+          echo "⚠️ No iOS SDK found in theos-roothide, listing all:"
+          ls -la /opt/theos-roothide/sdks/
         fi
         
         # Install ldid (for code signing)
