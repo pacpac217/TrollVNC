@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrollVNC Server Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-mobile-alt"></i>
+                <h1>TrollVNC</h1>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-page="dashboard">
+                    <i class="fas fa-th-large"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" data-page="devices">
+                    <i class="fas fa-mobile-alt"></i>
+                    <span>Devices</span>
+                    <span class="badge" id="deviceCount">0</span>
+                </a>
+                <a href="#" class="nav-item" data-page="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="server-status">
+                    <div class="status-indicator online"></div>
+                    <span>Server Online</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Page -->
+            <div class="page active" id="dashboard-page">
+                <div class="page-header">
+                    <h2>Dashboard</h2>
+                    <button class="btn btn-primary" onclick="refreshDevices()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon blue">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalDevices">0</h3>
+                            <p>Total Devices</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon green">
+                            <i class="fas fa-plug"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="connectedDevices">0</h3>
+                            <p>Connected</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon orange">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalClients">0</h3>
+                            <p>Active Viewers</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon purple">
+                            <i class="fas fa-redo"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalReconnects">0</h3>
+                            <p>Total Reconnects</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Devices List -->
+                <div class="devices-section">
+                    <h3>Connected Devices</h3>
+                    <div class="devices-grid" id="devicesGrid">
+                        <div class="empty-state">
+                            <i class="fas fa-mobile-alt"></i>
+                            <p>No devices connected</p>
+                            <small>Waiting for iPhone connections...</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Devices Page -->
+            <div class="page" id="devices-page">
+                <div class="page-header">
+                    <h2>All Devices</h2>
+                    <div class="header-actions">
+                        <input type="text" class="search-input" placeholder="Search devices..." id="searchInput">
+                        <button class="btn btn-primary" onclick="refreshDevices()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+                <div class="devices-table-container">
+                    <table class="devices-table">
+                        <thead>
+                            <tr>
+                                <th>Device ID</th>
+                                <th>Status</th>
+                                <th>IP Address</th>
+                                <th>Connected At</th>
+                                <th>Last Reconnect</th>
+                                <th>Reconnects</th>
+                                <th>Viewers</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="devicesTableBody">
+                            <tr>
+                                <td colspan="8" class="empty-row">
+                                    <div class="empty-state">
+                                        <i class="fas fa-mobile-alt"></i>
+                                        <p>No devices found</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Settings Page -->
+            <div class="page" id="settings-page">
+                <div class="page-header">
+                    <h2>Settings</h2>
+                </div>
+                <div class="settings-container">
+                    <div class="settings-section">
+                        <h3>Server Configuration</h3>
+                        <div class="setting-item">
+                            <label>VNC Listener Port</label>
+                            <input type="number" value="5500" readonly>
+                            <small>Port for iPhone reverse connections</small>
+                        </div>
+                        <div class="setting-item">
+                            <label>WebSocket Port</label>
+                            <input type="number" value="8080" readonly>
+                            <small>Port for web client connections</small>
+                        </div>
+                        <div class="setting-item">
+                            <label>HTTP API Port</label>
+                            <input type="number" value="3000" readonly>
+                            <small>Port for API endpoints</small>
+                        </div>
+                    </div>
+                    <div class="settings-section">
+                        <h3>Auto Refresh</h3>
+                        <div class="setting-item">
+                            <label>
+                                <input type="checkbox" id="autoRefresh" checked>
+                                Enable auto refresh
+                            </label>
+                            <small>Automatically refresh device list every 5 seconds</small>
+                        </div>
+                        <div class="setting-item">
+                            <label>Refresh Interval (seconds)</label>
+                            <input type="number" id="refreshInterval" value="5" min="1" max="60">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Device Viewer Modal -->
+        <div class="modal" id="viewerModal">
+            <div class="modal-content large">
+                <div class="modal-header">
+                    <h3 id="viewerDeviceName">Device Viewer</h3>
+                    <button class="modal-close" onclick="closeViewer()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="vnc-viewer-container">
+                        <div class="vnc-toolbar">
+                            <button class="btn btn-sm" onclick="toggleFullscreen()">
+                                <i class="fas fa-expand"></i> Fullscreen
+                            </button>
+                            <button class="btn btn-sm" onclick="sendCtrlAltDel()">
+                                <i class="fas fa-keyboard"></i> Ctrl+Alt+Del
+                            </button>
+                            <div class="viewer-status">
+                                <span class="status-indicator" id="viewerStatus"></span>
+                                <span id="viewerStatusText">Connecting...</span>
+                            </div>
+                        </div>
+                        <div class="vnc-screen-container">
+                            <canvas id="vncCanvas"></canvas>
+                            <div class="vnc-loading" id="vncLoading">
+                                <div class="spinner"></div>
+                                <p>Connecting to device...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
+

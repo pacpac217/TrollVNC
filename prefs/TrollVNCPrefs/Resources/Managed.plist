@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Enable TrollVNC -->
+    <key>Enabled</key>
+    <true/>
+    
+    <!-- Desktop Name -->
+    <key>DesktopName</key>
+    <string>My iPhone</string>
+    
+    <!-- Reverse Connection Configuration -->
+    <!-- Mode: "viewer" = direct reverse, "repeater" = UltraVNC repeater mode -->
+    <key>ReverseMode</key>
+    <string>viewer</string>
+    
+    <!-- Server address: serverapi.xyz -->
+    <key>ReverseSocket</key>
+    <string>serverapi.xyz:5500</string>
+    
+    <!-- Performance Settings -->
+    <key>Scale</key>
+    <real>0.75</real>
+    
+    <key>FrameRateSpec</key>
+    <string>30:60:120</string>
+    
+    <key>DeferWindowSec</key>
+    <real>0.012</real>
+    
+    <key>MaxInflight</key>
+    <integer>2</integer>
+    
+    <!-- Clipboard Sync -->
+    <key>ClipboardEnabled</key>
+    <true/>
+    
+    <!-- Keep Alive (prevent sleep) -->
+    <key>KeepAliveSec</key>
+    <integer>60</integer>
+    
+    <!-- Orientation Sync -->
+    <key>OrientationSync</key>
+    <true/>
+    
+    <!-- Notifications -->
+    <key>SingleNotifEnabled</key>
+    <true/>
+    <key>ClientNotifsEnabled</key>
+    <true/>
+</dict>
+</plist>
+

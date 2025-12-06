@@ -1,0 +1,105 @@
+name: Build TrollVNC
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+    inputs:
+      use_managed_config:
+        description: 'Use Managed.plist (preconfigured for serverapi.xyz)'
+        required: false
+        type: boolean
+        default: true
+
+jobs:
+  build:
+    runs-on: macos-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+    
+    - name: Setup Theos
+      uses: beerpiss/theos-action@v1
+      with:
+        theos-sdks: https://github.com/theos/sdks/archive/master.zip
+    
+    - name: Check Managed.plist
+      run: |
+        if [ -f "prefs/TrollVNCPrefs/Resources/Managed.plist" ]; then
+          echo "✅ Managed.plist exists"
+          echo "Configuration:"
+          cat prefs/TrollVNCPrefs/Resources/Managed.plist | grep -A1 "ReverseSocket"
+        else
+          echo "⚠️  Managed.plist not found - will use default config"
+        fi
+    
+    - name: Build Package (Rootless)
+      run: |
+        make clean
+        make package THEOS_PACKAGE_SCHEME=rootless FINALPACKAGE=1
+      env:
+        THEOS: /opt/theos
+    
+    - name: Build Package (Roothide)
+      run: |
+        make clean
+        make package THEOS_PACKAGE_SCHEME=roothide FINALPACKAGE=1
+      env:
+        THEOS: /opt/theos
+    
+    - name: Rename packages
+      run: |
+        mkdir -p build-output
+        if [ -f packages/*.deb ]; then
+          # Rootless
+          cp packages/*rootless*.deb build-output/TrollVNC-rootless.deb || cp packages/*.deb build-output/TrollVNC-rootless.deb
+        fi
+    
+    - name: Get version
+      id: version
+      run: |
+        VERSION=$(grep "^Version:" layout/DEBIAN/control | cut -d' ' -f2)
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "Version: $VERSION"
+    
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: TrollVNC-${{ steps.version.outputs.version }}
+        path: |
+          packages/*.deb
+          build-output/*.deb
+    
+    - name: Create Release (on tag)
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          packages/*.deb
+          build-output/*.deb
+        body: |
+          ## TrollVNC Build
+          
+          ### 📦 Packages
+          - **TrollVNC-rootless.deb** - For TrollStore/Dopamine (iOS 14-16)
+          
+          ### 🔧 Configuration
+          This build includes reverse connection to **serverapi.xyz:5500**
+          
+          ### 📱 Installation
+          1. Download the appropriate .deb file
+          2. Install via TrollStore
+          3. Open TrollVNC and enable it in Settings
+          4. Device will auto-connect to serverapi.xyz
+          
+          ### 🌐 View on Web
+          Visit: https://serverapi.xyz/monitor
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

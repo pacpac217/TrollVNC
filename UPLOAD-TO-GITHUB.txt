@@ -1,0 +1,210 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║           🚀 HƯỚNG DẪN TẢI LÊN GITHUB - 3 CÁCH                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ ⭐ CÁCH 1: DÙNG GITHUB DESKTOP (KHUYẾN NGHỊ - DỄ NHẤT)                      │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  📥 BƯỚC 1: Tải GitHub Desktop
+     → Link: https://desktop.github.com/
+     → Tải file .exe và cài đặt
+     → Đăng nhập tài khoản GitHub của bạn
+
+  📁 BƯỚC 2: Thêm Repository
+     1. Mở GitHub Desktop
+     2. File → Add Local Repository
+     3. Chọn thư mục này:
+        C:\Users\quang nguyen\Desktop\setting view máy iphone\TrollVNC-main
+     4. Nếu thấy "This directory does not appear to be a Git repository"
+        → Click "create a repository here"
+
+  📤 BƯỚC 3: Publish lên GitHub
+     1. Click nút "Publish repository" (góc trên)
+     2. Điền:
+        - Name: TrollVNC (hoặc tên khác bạn thích)
+        - Description: TrollVNC with serverapi.xyz integration
+        - ☐ Keep this code private (chọn nếu muốn private)
+     3. Click "Publish repository"
+     
+  ✅ XONG! Đợi 1-2 phút, code sẽ lên GitHub
+     → Truy cập: https://github.com/YOUR_USERNAME/TrollVNC để xem
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 💻 CÁCH 2: DÙNG VISUAL STUDIO CODE (NẾU BẠN DÙNG VS CODE)                   │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  📂 BƯỚC 1: Mở thư mục
+     1. Mở VS Code
+     2. File → Open Folder
+     3. Chọn: TrollVNC-main
+
+  🔧 BƯỚC 2: Initialize Git
+     1. Click icon "Source Control" (bên trái, icon 3 nhánh)
+     2. Click "Initialize Repository"
+
+  💾 BƯỚC 3: Commit code
+     1. Trong Source Control panel:
+        - Click dấu + bên cạnh "Changes" (stage all)
+     2. Nhập commit message:
+        "Initial commit with serverapi.xyz integration"
+     3. Click dấu ✓ (Commit)
+
+  ☁️ BƯỚC 4: Publish lên GitHub
+     1. Click "Publish Branch" (ở bottom bar)
+     2. Chọn Private hoặc Public
+     3. Đăng nhập GitHub nếu được hỏi
+     
+  ✅ XONG! Code đã lên GitHub
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ ⌨️  CÁCH 3: DÙNG GIT COMMAND LINE (CHO NGƯỜI BIẾT GIT)                      │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  📥 BƯỚC 1: Cài Git
+     → Link: https://git-scm.com/download/win
+     → Tải "64-bit Git for Windows Setup"
+     → Cài đặt với các tùy chọn mặc định
+     → Khởi động lại Terminal/PowerShell
+
+  ⌨️  BƯỚC 2: Mở PowerShell tại thư mục TrollVNC-main
+     → Right-click vào thư mục → Open in Terminal
+     → Hoặc mở PowerShell và cd đến thư mục
+
+  📝 BƯỚC 3: Tạo repository trên GitHub trước
+     1. Truy cập: https://github.com/new
+     2. Repository name: TrollVNC
+     3. Private/Public: Chọn tùy ý
+     4. KHÔNG chọn "Add README" hay .gitignore
+     5. Click "Create repository"
+     6. Copy URL: https://github.com/YOUR_USERNAME/TrollVNC.git
+
+  💻 BƯỚC 4: Chạy các lệnh (thay YOUR_USERNAME/TrollVNC)
+     
+     # Khởi tạo Git
+     git init
+     
+     # Thêm remote
+     git remote add origin https://github.com/YOUR_USERNAME/TrollVNC.git
+     
+     # Stage all files
+     git add .
+     
+     # Commit
+     git commit -m "Initial commit with serverapi.xyz integration"
+     
+     # Push lên GitHub
+     git branch -M main
+     git push -u origin main
+     
+  🔐 Nếu hỏi username/password:
+     - Username: your_github_username
+     - Password: Dùng Personal Access Token (không phải password thường)
+     
+     Tạo token:
+     1. GitHub → Settings → Developer settings
+     2. Personal access tokens → Tokens (classic)
+     3. Generate new token
+     4. Chọn: repo (full control)
+     5. Copy token và paste vào khi hỏi password
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 🏗️  SAU KHI TẢI LÊN GITHUB                                                   │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  ⏳ BƯỚC 1: GitHub Actions sẽ tự động build
+     1. Truy cập: https://github.com/YOUR_USERNAME/TrollVNC
+     2. Click tab "Actions"
+     3. Thấy workflow "Build TrollVNC" đang chạy
+     4. Đợi 5-10 phút cho build hoàn thành
+
+  📥 BƯỚC 2: Tải file .deb
+     Sau khi build xong (tất cả steps màu xanh):
+     1. Click vào build run
+     2. Scroll xuống phần "Artifacts"
+     3. Tải file: TrollVNC-X.X.X.zip
+     4. Giải nén → Lấy file .deb
+
+  📱 BƯỚC 3: Cài trên iPhone
+     1. Copy file .deb lên iPhone (AirDrop/iCloud/SSH)
+     2. Mở TrollStore
+     3. Tap dấu + → Chọn .deb → Install
+     4. Mở app TrollVNC → Settings → Bật Enabled
+
+  ✅ BƯỚC 4: Kiểm tra kết nối
+     → Truy cập: https://serverapi.xyz/monitor
+     → Thấy device trong list (🟢 Bật)
+     → Click "📺 VNC Live"
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 📁 FILES ĐÃ ĐƯỢC TẠO SẴN                                                     │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  ✅ .gitignore
+     → Loại trừ files không cần (node_modules, packages, logs...)
+
+  ✅ .github/workflows/build.yml
+     → GitHub Actions workflow để build tự động
+     → Build cả rootless và roothide
+     → Upload file .deb làm artifacts
+
+  ✅ prefs/TrollVNCPrefs/Resources/Managed.plist
+     → Đã cấu hình sẵn: serverapi.xyz:5500
+     → iPhone sẽ tự động kết nối đến server này
+
+  ✅ src/trollvncserver.mm
+     → Đã có code gửi Device ID
+     → Đã có reverse connection logic
+
+  ✅ server-vnc-proxy.js
+     → Node.js proxy server (chạy trên serverapi.xyz)
+
+  ✅ severapixyz.py
+     → Flask web UI với VNC viewer
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ ⚠️  TROUBLESHOOTING                                                           │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  ❌ "This directory appears to be empty"
+     → Refresh hoặc add files lại
+     → Check .gitignore không exclude quá nhiều
+
+  ❌ Build failed: "No Xcode found"
+     → Đây là lỗi GitHub Actions, không phải lỗi của bạn
+     → Workflow đã cấu hình đúng, chỉ cần đợi
+
+  ❌ "Permission denied"
+     → Check repository settings
+     → Đảm bảo Actions được enable (Settings → Actions → Allow all)
+
+  ❌ Không tải được .deb
+     → Build phải hoàn thành (tất cả steps màu xanh)
+     → Artifacts có thời hạn 90 ngày
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 🎯 TÓM TẮT                                                                    │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  1. Chọn 1 trong 3 cách trên để tải code lên GitHub
+  2. Đợi GitHub Actions build (5-10 phút)
+  3. Tải file .deb từ Artifacts
+  4. Cài trên iPhone qua TrollStore
+  5. Kiểm tra trên https://serverapi.xyz/monitor
+
+  📚 Xem thêm:
+     → GITHUB-SETUP.md - Hướng dẫn chi tiết
+     → QUICK-START.md - Quick start guide
+     → STATUS-CHECK.txt - Checklist đầy đủ
+
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  🚀 KHUYẾN NGHỊ: Dùng GitHub Desktop (Cách 1) - Dễ và nhanh nhất!          ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
