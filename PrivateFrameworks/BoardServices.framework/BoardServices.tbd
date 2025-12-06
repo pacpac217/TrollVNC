@@ -1,5 +1,5 @@
 --- !tapi-tbd-v3
-archs:                 [ x86_64, arm64 ]
+archs:                 [ arm64 ]
 platform:              ios
 flags:                 [ flat_namespace ]
 install-name:          /System/Library/PrivateFrameworks/BoardServices.framework/BoardServices
@@ -7,7 +7,7 @@ current-version:       0
 compatibility-version: 1
 objc-constraint:       retain_release
 exports:
-  - archs:                [ x86_64, arm64 ]
+  - archs:                [ arm64 ]
     symbols:              [ _BSBoardServicesVersionNumber,
                             _BSBoardServicesVersionString,
                             _BSServiceBootstrapLog,
