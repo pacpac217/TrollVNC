@@ -29,10 +29,16 @@ jobs:
         set -e
         echo "📦 Installing Theos..."
         
-        # Install Theos
+        # Install Theos (for compatibility)
         if [ ! -d "/opt/theos" ]; then
           sudo mkdir -p /opt
           sudo git clone --recursive https://github.com/theos/theos.git /opt/theos
+        fi
+        
+        # Install Theos-Roothide (required for roothide package scheme)
+        echo "📦 Installing Theos-Roothide..."
+        if [ ! -d "/opt/theos-roothide" ]; then
+          sudo git clone --recursive https://github.com/roothide/theos-roothide.git /opt/theos-roothide
         fi
         
         # Download iOS SDKs - Use full archive approach
@@ -52,8 +58,15 @@ jobs:
         
         sudo rm -f master.zip
         
+        # Copy SDKs to theos-roothide
+        if [ -d "/opt/theos-roothide" ] && [ ! -d "/opt/theos-roothide/sdks" ]; then
+          sudo cp -r /opt/theos/sdks /opt/theos-roothide/
+          echo "✅ SDKs copied to /opt/theos-roothide/sdks"
+        fi
+        
         # Verify installation
         echo "✅ Theos installed at: /opt/theos"
+        echo "✅ Theos-Roothide installed at: /opt/theos-roothide"
         echo "Available SDKs:"
         ls -la /opt/theos/sdks/ | grep -i "iphone" || ls -la /opt/theos/sdks/
         
@@ -106,8 +119,9 @@ jobs:
     
     - name: Build Package (Roothide)
       run: |
-        export THEOS=/opt/theos
-        export PATH="/opt/theos/bin:$PATH"
+        export THEOS=/opt/theos-roothide
+        export PATH="/opt/theos-roothide/bin:$PATH"
+        export THEOS_PACKAGE_SCHEME=roothide
         
         echo "🧹 Cleaning previous build..."
         make clean || true
@@ -118,7 +132,7 @@ jobs:
         echo "✅ Roothide build complete!"
         ls -lh packages/
       env:
-        THEOS: /opt/theos
+        THEOS: /opt/theos-roothide
     
     - name: Rename packages
       run: |
