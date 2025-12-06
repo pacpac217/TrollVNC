@@ -21,6 +21,9 @@
 
 #import <Accelerate/Accelerate.h>
 #import <Foundation/Foundation.h>
+
+// UIKit workaround must be imported before UIKit
+#import "UIKitWorkaround.h"
 #import <UIKit/UIDevice.h>
 
 #import <arpa/inet.h>

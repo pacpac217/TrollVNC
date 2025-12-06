@@ -40,24 +40,34 @@ jobs:
         sudo mkdir -p /opt/theos/sdks
         cd /opt/theos/sdks
         
-        # Download all available SDKs from theos/sdks
-        echo "Downloading iOS SDKs archive..."
-        sudo curl -LO https://github.com/theos/sdks/archive/refs/heads/master.zip
-        sudo unzip -q master.zip
-        sudo mv sdks-master/* .
-        sudo rm -rf sdks-master master.zip
+        # Download specific iOS SDK 14.5 (more stable for this codebase)
+        echo "Downloading iOS 14.5 SDK..."
+        cd /opt/theos/sdks
+        sudo curl -LO https://github.com/theos/sdks/releases/download/master/iPhoneOS14.5.sdk.tar.xz || {
+          echo "Failed to download from releases, trying archive..."
+          sudo curl -LO https://github.com/theos/sdks/archive/refs/heads/master.zip
+          sudo unzip -q master.zip
+          sudo mv sdks-master/* .
+          sudo rm -rf sdks-master master.zip
+        }
+        
+        # Extract if tar.xz was downloaded
+        if [ -f "iPhoneOS14.5.sdk.tar.xz" ]; then
+          sudo tar -xf iPhoneOS14.5.sdk.tar.xz
+          sudo rm iPhoneOS14.5.sdk.tar.xz
+        fi
         
         # Verify installation
         echo "✅ Theos installed at: /opt/theos"
         echo "Available SDKs:"
         ls -la /opt/theos/sdks/
         
-        # Check if iPhoneOS16.5.sdk exists
-        if [ -d "/opt/theos/sdks/iPhoneOS16.5.sdk" ]; then
-          echo "✅ iOS 16.5 SDK found"
+        # Check available SDKs
+        if ls /opt/theos/sdks/iPhoneOS*.sdk 1> /dev/null 2>&1; then
+          echo "✅ iOS SDK found:"
+          ls -d /opt/theos/sdks/iPhoneOS*.sdk
         else
-          echo "⚠️ iOS 16.5 SDK not found, listing available SDKs:"
-          ls -la /opt/theos/sdks/ | grep -i iphone || echo "No iPhone SDKs found"
+          echo "⚠️ No iOS SDK found!"
         fi
         
         # Install ldid (for code signing)

@@ -8,7 +8,7 @@ IPHONE_SIMULATOR_ROOT := $(shell devkit/sim-root.sh)
 else
 ARCHS := arm64
 # Try to find the best available SDK
-# Priority: 16.5 > 16.4 > 15.6 > 15.5 > latest
+# Priority: 14.5 > 15.x > 16.x > latest (14.5 is most stable for this codebase)
 AVAILABLE_SDKS := $(wildcard $(THEOS)/sdks/iPhoneOS*.sdk)
 ifeq ($(AVAILABLE_SDKS),)
     # No SDK found, use latest
@@ -18,14 +18,22 @@ ifeq ($(AVAILABLE_SDKS),)
     TARGET := iphone:clang:latest:15.0
     endif
 else
-    # SDK found, prefer 16.5 but fallback to latest
-    ifneq ($(wildcard $(THEOS)/sdks/iPhoneOS16.5.sdk),)
+    # SDK found, prefer 14.5 for compatibility
+    ifneq ($(wildcard $(THEOS)/sdks/iPhoneOS14.5.sdk),)
         ifeq ($(THEOS_PACKAGE_SCHEME),)
-        TARGET := iphone:clang:16.5:14.0
+        TARGET := iphone:clang:14.5:14.0
         else
-        TARGET := iphone:clang:16.5:15.0
+        TARGET := iphone:clang:14.5:15.0
+        endif
+    else ifneq ($(wildcard $(THEOS)/sdks/iPhoneOS15.*.sdk),)
+        # Fallback to iOS 15.x
+        ifeq ($(THEOS_PACKAGE_SCHEME),)
+        TARGET := iphone:clang:15.5:14.0
+        else
+        TARGET := iphone:clang:15.5:15.0
         endif
     else
+        # Use latest available
         ifeq ($(THEOS_PACKAGE_SCHEME),)
         TARGET := iphone:clang:latest:14.0
         else
@@ -53,6 +61,8 @@ trollvncserver_FILES += src/OhMyJetsam.mm
 trollvncserver_CFLAGS += -fobjc-arc
 trollvncserver_CFLAGS += -Wno-unknown-warning-option
 trollvncserver_CFLAGS += -Wno-unused-but-set-variable
+trollvncserver_CFLAGS += -Wno-incompatible-pointer-types
+trollvncserver_CFLAGS += -Wno-deprecated-declarations
 ifeq ($(THEOS_DEVICE_SIMULATOR),)
 trollvncserver_CFLAGS += -march=armv8-a+crc
 endif
