@@ -40,16 +40,25 @@ jobs:
         sudo mkdir -p /opt/theos/sdks
         cd /opt/theos/sdks
         
-        # Download specific iOS SDK 16.5
-        echo "Downloading iOS 16.5 SDK..."
-        sudo curl -LO https://github.com/theos/sdks/releases/download/master/iPhoneOS16.5.sdk.tar.xz
-        sudo tar -xf iPhoneOS16.5.sdk.tar.xz
-        sudo rm iPhoneOS16.5.sdk.tar.xz
+        # Download all available SDKs from theos/sdks
+        echo "Downloading iOS SDKs archive..."
+        sudo curl -LO https://github.com/theos/sdks/archive/refs/heads/master.zip
+        sudo unzip -q master.zip
+        sudo mv sdks-master/* .
+        sudo rm -rf sdks-master master.zip
         
         # Verify installation
         echo "✅ Theos installed at: /opt/theos"
         echo "Available SDKs:"
         ls -la /opt/theos/sdks/
+        
+        # Check if iPhoneOS16.5.sdk exists
+        if [ -d "/opt/theos/sdks/iPhoneOS16.5.sdk" ]; then
+          echo "✅ iOS 16.5 SDK found"
+        else
+          echo "⚠️ iOS 16.5 SDK not found, listing available SDKs:"
+          ls -la /opt/theos/sdks/ | grep -i iphone || echo "No iPhone SDKs found"
+        fi
         
         # Install ldid (for code signing)
         echo "🔐 Installing ldid..."

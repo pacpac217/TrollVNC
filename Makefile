@@ -7,10 +7,31 @@ TARGET := simulator:clang:latest:15.0
 IPHONE_SIMULATOR_ROOT := $(shell devkit/sim-root.sh)
 else
 ARCHS := arm64
-ifeq ($(THEOS_PACKAGE_SCHEME),)
-TARGET := iphone:clang:latest:14.0
+# Try to find the best available SDK
+# Priority: 16.5 > 16.4 > 15.6 > 15.5 > latest
+AVAILABLE_SDKS := $(wildcard $(THEOS)/sdks/iPhoneOS*.sdk)
+ifeq ($(AVAILABLE_SDKS),)
+    # No SDK found, use latest
+    ifeq ($(THEOS_PACKAGE_SCHEME),)
+    TARGET := iphone:clang:latest:14.0
+    else
+    TARGET := iphone:clang:latest:15.0
+    endif
 else
-TARGET := iphone:clang:latest:15.0
+    # SDK found, prefer 16.5 but fallback to latest
+    ifneq ($(wildcard $(THEOS)/sdks/iPhoneOS16.5.sdk),)
+        ifeq ($(THEOS_PACKAGE_SCHEME),)
+        TARGET := iphone:clang:16.5:14.0
+        else
+        TARGET := iphone:clang:16.5:15.0
+        endif
+    else
+        ifeq ($(THEOS_PACKAGE_SCHEME),)
+        TARGET := iphone:clang:latest:14.0
+        else
+        TARGET := iphone:clang:latest:15.0
+        endif
+    endif
 endif
 endif
 
