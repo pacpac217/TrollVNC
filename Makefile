@@ -8,9 +8,9 @@ IPHONE_SIMULATOR_ROOT := $(shell devkit/sim-root.sh)
 else
 ARCHS := arm64
 ifeq ($(THEOS_PACKAGE_SCHEME),)
-TARGET := iphone:clang:16.5:14.0
+TARGET := iphone:clang:latest:14.0
 else
-TARGET := iphone:clang:16.5:15.0
+TARGET := iphone:clang:latest:15.0
 endif
 endif
 

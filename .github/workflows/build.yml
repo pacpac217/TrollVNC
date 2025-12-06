@@ -15,18 +15,42 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: macos-13
     
     steps:
     - name: Checkout
       uses: actions/checkout@v4
       with:
         submodules: recursive
+        fetch-depth: 0
     
     - name: Setup Theos
-      uses: beerpiss/theos-action@v1
-      with:
-        theos-sdks: https://github.com/theos/sdks/archive/master.zip
+      run: |
+        set -e
+        echo "📦 Installing Theos..."
+        
+        # Install Theos
+        if [ ! -d "/opt/theos" ]; then
+          sudo mkdir -p /opt
+          sudo git clone --recursive https://github.com/theos/theos.git /opt/theos
+        fi
+        
+        # Download iOS SDKs
+        echo "📥 Downloading iOS SDKs..."
+        cd /opt/theos
+        sudo curl -LO https://github.com/theos/sdks/archive/master.zip
+        sudo unzip -q master.zip
+        sudo mv sdks-master sdks
+        
+        # Verify installation
+        echo "✅ Theos installed at: /opt/theos"
+        ls -la /opt/theos/sdks/
+        
+        # Install ldid (for code signing)
+        echo "🔐 Installing ldid..."
+        brew install ldid
+        
+        echo "✅ Setup complete!"
     
     - name: Check Managed.plist
       run: |
@@ -40,15 +64,33 @@ jobs:
     
     - name: Build Package (Rootless)
       run: |
-        make clean
+        export THEOS=/opt/theos
+        export PATH="/opt/theos/bin:$PATH"
+        
+        echo "🧹 Cleaning previous build..."
+        make clean || true
+        
+        echo "🔨 Building rootless package..."
         make package THEOS_PACKAGE_SCHEME=rootless FINALPACKAGE=1
+        
+        echo "✅ Rootless build complete!"
+        ls -lh packages/
       env:
         THEOS: /opt/theos
     
     - name: Build Package (Roothide)
       run: |
-        make clean
+        export THEOS=/opt/theos
+        export PATH="/opt/theos/bin:$PATH"
+        
+        echo "🧹 Cleaning previous build..."
+        make clean || true
+        
+        echo "🔨 Building roothide package..."
         make package THEOS_PACKAGE_SCHEME=roothide FINALPACKAGE=1
+        
+        echo "✅ Roothide build complete!"
+        ls -lh packages/
       env:
         THEOS: /opt/theos
     
@@ -68,12 +110,14 @@ jobs:
         echo "Version: $VERSION"
     
     - name: Upload Artifacts
+      if: always()
       uses: actions/upload-artifact@v4
       with:
         name: TrollVNC-${{ steps.version.outputs.version }}
         path: |
           packages/*.deb
           build-output/*.deb
+        if-no-files-found: warn
     
     - name: Create Release (on tag)
       if: startsWith(github.ref, 'refs/tags/')
