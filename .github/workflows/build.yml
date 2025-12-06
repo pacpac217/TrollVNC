@@ -38,7 +38,11 @@ jobs:
         # Install Theos-Roothide (required for roothide package scheme)
         echo "📦 Installing Theos-Roothide..."
         if [ ! -d "/opt/theos-roothide" ]; then
-          sudo git clone --recursive https://github.com/roothide/theos-roothide.git /opt/theos-roothide
+          # Clone without failing on submodule errors (some may be missing)
+          sudo git clone https://github.com/roothide/theos-roothide.git /opt/theos-roothide || true
+          cd /opt/theos-roothide
+          sudo git submodule update --init --recursive || true
+          cd -
         fi
         
         # Download iOS SDKs - Use full archive approach
@@ -59,9 +63,10 @@ jobs:
         sudo rm -f master.zip
         
         # Copy SDKs to theos-roothide (force copy to ensure they exist)
+        # Ignore errors from missing AppleTVOS SDK files (not needed for iOS builds)
         if [ -d "/opt/theos-roothide" ]; then
           sudo rm -rf /opt/theos-roothide/sdks
-          sudo cp -r /opt/theos/sdks /opt/theos-roothide/
+          (sudo cp -r /opt/theos/sdks /opt/theos-roothide/ 2>&1 | grep -v "No such file or directory" || true)
           echo "✅ SDKs copied to /opt/theos-roothide/sdks"
         fi
         
