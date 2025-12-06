@@ -29,14 +29,14 @@
 			<true/>
 		</dict>
 
-		<!-- Desktop Name -->
+		<!-- Desktop Name (Auto-generated from port) -->
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
 			<key>label</key>
 			<string></string>
 			<key>footerText</key>
-			<string>Name shown to VNC clients.</string>
+			<string>Desktop Name will be automatically generated from Reverse Connection port. Port 10010 → "Device-10", Port 10300 → "Device-300". You can leave this empty or it will be auto-filled.</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -46,11 +46,11 @@
 			<key>key</key>
 			<string>DesktopName</string>
 			<key>label</key>
-			<string>Desktop Name</string>
+			<string>Desktop Name (Auto)</string>
+			<key>placeholder</key>
+			<string>Auto: Device-10</string>
 			<key>default</key>
 			<string>TrollVNC</string>
-			<key>placeholder</key>
-			<string>Shown to VNC clients</string>
 			<key>keyboard</key>
 			<string>alphabet</string>
 		</dict>
@@ -745,7 +745,7 @@
 			<key>label</key>
 			<string>Reverse Connection</string>
 			<key>footerText</key>
-			<string>Establish a reverse connection to a listening VNC viewer or repeater without opening a server port. This is useful for bypassing firewalls or NAT.</string>
+			<string>Enter server IP and port. Device ID will be auto-generated from port number. Examples: serverapi.xyz:10010 (Device-10), serverapi.xyz:10300 (Device-300). Port format: 10001-10500 (Device 1-500).</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -789,11 +789,15 @@
 			<key>key</key>
 			<string>ReverseSocket</string>
 			<key>label</key>
-			<string>Server</string>
+			<string>Server (IP:Port)</string>
 			<key>placeholder</key>
-			<string>server:port</string>
+			<string>serverapi.xyz:10010</string>
 			<key>noAutoCorrect</key>
 			<true/>
+			<key>keyboardType</key>
+			<string>URL</string>
+			<key>footerText</key>
+			<string>Port determines device number: 10010 = Device-10, 10300 = Device-300. Only enter IP:Port, Device ID will be auto-generated.</string>
 		</dict>
 		<dict>
 			<key>cell</key>

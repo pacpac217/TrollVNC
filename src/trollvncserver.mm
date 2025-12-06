@@ -4722,11 +4722,37 @@ static void initializeAndRunRfbServer(void) {
         } else {
             TVLog(@"VNC server running in viewer mode");
             
-            // Get device identifier for reverse connection
-            NSString *deviceId = [[[UIDevice currentDevice] identifierForVendor] UUIDString];
-            if (!deviceId || deviceId.length == 0) {
-                // Fallback to hostname or random UUID
-                deviceId = [[NSUUID UUID] UUIDString];
+            // Auto-generate Device ID from port number
+            // Port format: 10001, 10010, 10300, etc.
+            // Device number = Port - 10000
+            // Example: Port 10010 → Device-10, Port 10300 → Device-300
+            int deviceNumber = gRepeaterPort - 10000;
+            NSString *deviceId = nil;
+            
+            if (deviceNumber > 0 && deviceNumber <= 500) {
+                // Generate Device ID from port: "Device-10", "Device-300", etc.
+                deviceId = [NSString stringWithFormat:@"Device-%d", deviceNumber];
+                TVLog(@"Auto-generated Device ID from port %d: %@", gRepeaterPort, deviceId);
+                
+                // Also update Desktop Name if not set or different
+                if (!gDesktopName || gDesktopName.length == 0 || 
+                    ![gDesktopName isEqualToString:deviceId]) {
+                    gDesktopName = deviceId;
+                    TVLog(@"Desktop Name updated to: %@", gDesktopName);
+                }
+            } else {
+                // Fallback: Use Desktop Name if port is not in expected range
+                deviceId = gDesktopName;
+                if (!deviceId || deviceId.length == 0) {
+                    // Last fallback: UUID
+                    deviceId = [[[UIDevice currentDevice] identifierForVendor] UUIDString];
+                    if (!deviceId || deviceId.length == 0) {
+                        deviceId = [[NSUUID UUID] UUIDString];
+                    }
+                    TVLog(@"Port %d not in expected range (10001-10500), using UUID as Device ID: %@", gRepeaterPort, deviceId);
+                } else {
+                    TVLog(@"Port %d not in expected range, using Desktop Name as Device ID: %@", gRepeaterPort, deviceId);
+                }
             }
             
             // Create reverse connection
@@ -4747,7 +4773,7 @@ static void initializeAndRunRfbServer(void) {
                 const char *deviceIdBytes = [paddedDeviceId UTF8String];
                 ssize_t sent = send(sClient->sock, deviceIdBytes, 32, 0);
                 if (sent == 32) {
-                    TVLog(@"Device ID sent to server: %@", deviceId);
+                    TVLog(@"Device ID sent to server: %@ (port %d, device %d)", deviceId, gRepeaterPort, deviceNumber);
                 } else {
                     TVLog(@"Warning: Failed to send full device ID (sent %zd/32 bytes)", sent);
                 }

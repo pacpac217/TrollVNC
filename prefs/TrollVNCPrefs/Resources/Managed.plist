@@ -6,20 +6,23 @@
     <key>Enabled</key>
     <true/>
     
-    <!-- Desktop Name -->
-    <key>DesktopName</key>
-    <string>My iPhone</string>
+    <!-- Desktop Name: Tự động generate từ port, không cần set thủ công -->
+    <!-- Port 10010 → Device-10, Port 10300 → Device-300 -->
+    <!-- Desktop Name sẽ được tự động cập nhật từ port khi kết nối -->
+    <!-- <key>DesktopName</key> -->
+    <!-- <string>Device-10</string> -->
     
-    <!-- Direct Connection Configuration (No Reverse) -->
-    <!-- Port: Fixed port for direct VNC connection (5901 = default, or use different port per device) -->
-    <key>Port</key>
-    <integer>5901</integer>
+    <!-- Reverse Connection Configuration -->
+    <!-- Mode: "viewer" = iPhone kết nối đến server (reverse connection) -->
+    <key>ReverseMode</key>
+    <string>viewer</string>
     
-    <!-- Disable Reverse Connection (comment out or remove ReverseMode/ReverseSocket) -->
-    <!-- <key>ReverseMode</key> -->
-    <!-- <string>viewer</string> -->
-    <!-- <key>ReverseSocket</key> -->
-    <!-- <string>serverapi.xyz:5500</string> -->
+    <!-- Reverse Socket: serverapi.xyz:PORT -->
+    <!-- Device ID sẽ tự động generate từ port: Port - 10000 = Device Number -->
+    <!-- Ví dụ: Port 10010 → Device-10, Port 10300 → Device-300 -->
+    <!-- Chỉ cần nhập IP:Port, không cần set Desktop Name -->
+    <key>ReverseSocket</key>
+    <string>serverapi.xyz:10010</string>
     
     <!-- Performance Settings -->
     <key>Scale</key>
