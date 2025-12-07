@@ -39,6 +39,7 @@
 #include <sys/kern_control.h>
 #include <net/if.h>
 #include <net/route.h>
+// Move netinet includes outside __BEGIN_DECLS to avoid C++ module import errors
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 

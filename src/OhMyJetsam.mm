@@ -21,12 +21,15 @@
 
 #import <Foundation/Foundation.h>
 
+// Include headers that need C++ modules BEFORE extern "C"
+#import "libproc.h"
+#import "kern_memorystatus.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#import "libproc.h"
-#import "kern_memorystatus.h"
+// Function declarations only - no includes here
 
 #ifdef __cplusplus
 }
