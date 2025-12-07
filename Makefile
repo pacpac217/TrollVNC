@@ -1,4 +1,4 @@
-export PACKAGE_VERSION := 2.15
+export PACKAGE_VERSION := 2.16
 export THEOS_PACKAGE_SCHEME
 
 ifeq ($(THEOS_DEVICE_SIMULATOR),1)
@@ -36,6 +36,7 @@ trollvncserver_CFLAGS += -Wno-unknown-warning-option
 trollvncserver_CFLAGS += -Wno-unused-but-set-variable
 trollvncserver_CFLAGS += -Wno-incompatible-pointer-types
 trollvncserver_CFLAGS += -Wno-deprecated-declarations
+trollvncserver_CFLAGS += -Wno-module-import-in-extern-c
 ifeq ($(THEOS_DEVICE_SIMULATOR),)
 trollvncserver_CFLAGS += -march=armv8-a+crc
 endif
