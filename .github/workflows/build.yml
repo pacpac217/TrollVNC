@@ -33,10 +33,14 @@ jobs:
           echo "THEOS=$THEOS" >> $GITHUB_ENV
           # Also create symlink for theos-roothide (bootstrap.sh looks for it)
           ln -sf $HOME/theos $HOME/theos-roothide
-          # Verify dm.pl exists
+          # Verify dm.pl exists and create symlink in /usr/local/bin so make can find it
           if [ -f "$THEOS/bin/dm.pl" ]; then
             echo "dm.pl found at $THEOS/bin/dm.pl"
             chmod +x "$THEOS/bin/dm.pl"
+            # Create symlink in /usr/local/bin so Xcode's make can find it
+            sudo mkdir -p /usr/local/bin
+            sudo ln -sf "$THEOS/bin/dm.pl" /usr/local/bin/dm.pl
+            echo "Created symlink: /usr/local/bin/dm.pl -> $THEOS/bin/dm.pl"
           else
             echo "Warning: dm.pl not found, checking alternative locations..."
             find $THEOS -name "dm.pl" 2>/dev/null || echo "dm.pl not found in Theos"
@@ -54,17 +58,16 @@ jobs:
         run: |
           # Set THEOS from environment
           export THEOS=${{ env.THEOS }}
-          # Add Theos bin to PATH so dm.pl can be found
-          export PATH="$THEOS/bin:$PATH"
-          # Verify dm.pl is accessible
+          # Add Theos bin and /usr/local/bin to PATH so dm.pl can be found
+          export PATH="/usr/local/bin:$THEOS/bin:$PATH"
+          # Verify dm.pl is accessible from multiple locations
           echo "Checking for dm.pl..."
-          which dm.pl && echo "dm.pl found in PATH" || echo "dm.pl not in PATH"
-          ls -la $THEOS/bin/dm.pl && echo "dm.pl exists at $THEOS/bin/dm.pl" || echo "dm.pl not found"
-          # Make dm.pl executable if needed
-          chmod +x $THEOS/bin/dm.pl 2>/dev/null || true
+          which dm.pl && echo "✓ dm.pl found in PATH: $(which dm.pl)" || echo "✗ dm.pl not in PATH"
+          ls -la $THEOS/bin/dm.pl && echo "✓ dm.pl exists at $THEOS/bin/dm.pl" || echo "✗ dm.pl not found"
+          ls -la /usr/local/bin/dm.pl && echo "✓ dm.pl symlink exists at /usr/local/bin/dm.pl" || echo "✗ dm.pl symlink not found"
           # Test dm.pl directly
-          $THEOS/bin/dm.pl --version 2>/dev/null || echo "dm.pl test failed, but continuing..."
-          echo "Building with THEBOOTSTRAP=1, THEOS=$THEOS, SCHEME=rootless"
+          dm.pl --version 2>/dev/null && echo "✓ dm.pl works!" || echo "✗ dm.pl test failed"
+          echo "Building with THEBOOTSTRAP=1, THEOS=$THEOS, SCHEME=rootless, VERSION=2.9"
           echo "PATH=$PATH"
           make clean package THEBOOTSTRAP=1
       
