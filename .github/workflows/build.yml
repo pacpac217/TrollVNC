@@ -186,7 +186,7 @@ jobs:
           echo "Building with THEBOOTSTRAP=1"
           echo "THEOS=$THEOS"
           echo "SCHEME=rootless"
-          echo "VERSION=2.18"
+          echo "VERSION=2.19"
           echo "PATH=$PATH"
           echo "=========================================="
           
