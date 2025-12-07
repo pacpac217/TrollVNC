@@ -193,7 +193,7 @@ EOF
           echo "Building with THEBOOTSTRAP=1"
           echo "THEOS=$THEOS"
           echo "SCHEME=rootless"
-          echo "VERSION=2.13"
+          echo "VERSION=2.14"
           echo "PATH=$PATH"
           echo "=========================================="
           
