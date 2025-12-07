@@ -39,9 +39,15 @@
 #include <sys/kern_control.h>
 #include <net/if.h>
 #include <net/route.h>
-// Move netinet includes outside __BEGIN_DECLS to avoid C++ module import errors
+
+// Include netinet headers BEFORE __BEGIN_DECLS to avoid C++ module import errors
+// These headers are imported as C++ modules on newer macOS and cannot be inside extern "C"
+// Use pragma to suppress the warning if they still appear inside extern "C" from elsewhere
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmodule-import-in-extern-c"
 #include <netinet/in.h>
 #include <netinet/tcp.h>
+#pragma clang diagnostic pop
 
 __BEGIN_DECLS
 
