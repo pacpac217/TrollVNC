@@ -35,6 +35,17 @@
 }
 
 - (void)viewDidLoad {
+#ifdef THEBOOTSTRAP
+    // Standalone app mode: Don't load Settings UI
+    // Redirect to TVNCMainViewController instead
+    if (self.navigationController) {
+        UIViewController *mainVC = [[NSClassFromString(@"TVNCMainViewController") alloc] init];
+        if (mainVC) {
+            [self.navigationController setViewControllers:@[mainVC] animated:NO];
+            return;
+        }
+    }
+#endif
     [super viewDidLoad];
 
     NSBundle *resBundle = [NSBundle bundleWithPath:[[NSBundle mainBundle] pathForResource:@"TrollVNCPrefs"
