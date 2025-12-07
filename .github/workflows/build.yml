@@ -88,19 +88,12 @@ jobs:
             echo "⚠ WARNING: dm.pl not found in Theos!"
             echo "Creating minimal dm.pl wrapper..."
             mkdir -p "$THEOS/bin"
-            cat > "$THEOS/bin/dm.pl" << 'EOF'
-#!/usr/bin/env perl
-use strict;
-use warnings;
-# Minimal dm.pl wrapper - Theos should provide the real one
-# This is a fallback if dm.pl is missing
-if ($ARGV[0] eq '--version') {
-    print "dm.pl wrapper 1.0\n";
-    exit 0;
-}
-# For now, just pass through to system dpkg-deb
-exec('dpkg-deb', @ARGV) or die "Cannot execute dpkg-deb: $!";
-EOF
+            # Create dm.pl using echo with append to avoid YAML issues
+            echo '#!/usr/bin/env perl' > "$THEOS/bin/dm.pl"
+            echo 'use strict;' >> "$THEOS/bin/dm.pl"
+            echo 'use warnings;' >> "$THEOS/bin/dm.pl"
+            echo 'if ($ARGV[0] eq "--version") { print "dm.pl wrapper 1.0\n"; exit 0; }' >> "$THEOS/bin/dm.pl"
+            echo 'exec("dpkg-deb", @ARGV) or die "Cannot execute dpkg-deb: $!";' >> "$THEOS/bin/dm.pl"
             chmod +x "$THEOS/bin/dm.pl"
             DM_PL_PATH="$THEOS/bin/dm.pl"
             echo "✓ Created minimal dm.pl wrapper at $DM_PL_PATH"
