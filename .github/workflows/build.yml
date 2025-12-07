@@ -27,18 +27,17 @@ jobs:
       
       - name: Build with THEBOOTSTRAP=1 (Standalone App)
         run: |
-          # Source bootstrap.sh to set environment variables
-          source devkit/bootstrap.sh
-          # Override THEOS if bootstrap.sh set it to non-existent path
-          if [ ! -d "$THEOS" ]; then
-            export THEOS=$HOME/theos
-          fi
-          export FINALPACKAGE=1
-          # Ensure THEBOOTSTRAP is set and exported
+          # Set environment variables for standalone app build
+          export THEOS=$HOME/theos
+          export THEOS_PACKAGE_SCHEME=rootless
+          export THEOS_DEVICE_IP=127.0.0.1
+          export THEOS_DEVICE_PORT=58422
+          export THEOS_DEVICE_SIMULATOR=
           export THEBOOTSTRAP=1
+          export FINALPACKAGE=1
           echo "THEOS=$THEOS" >> $GITHUB_ENV
           echo "THEBOOTSTRAP=$THEBOOTSTRAP" >> $GITHUB_ENV
-          echo "Building with THEBOOTSTRAP=1, THEOS=$THEOS"
+          echo "Building with THEBOOTSTRAP=1, THEOS=$THEOS, SCHEME=$THEOS_PACKAGE_SCHEME"
           make clean package THEBOOTSTRAP=1
       
       - name: Create release artifacts
