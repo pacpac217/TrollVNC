@@ -33,17 +33,52 @@ jobs:
           echo "THEOS=$THEOS" >> $GITHUB_ENV
           # Also create symlink for theos-roothide (bootstrap.sh looks for it)
           ln -sf $HOME/theos $HOME/theos-roothide
-          # Verify dm.pl exists and create symlink in /usr/local/bin so make can find it
-          if [ -f "$THEOS/bin/dm.pl" ]; then
-            echo "dm.pl found at $THEOS/bin/dm.pl"
-            chmod +x "$THEOS/bin/dm.pl"
-            # Create symlink in /usr/local/bin so Xcode's make can find it
-            sudo mkdir -p /usr/local/bin
-            sudo ln -sf "$THEOS/bin/dm.pl" /usr/local/bin/dm.pl
-            echo "Created symlink: /usr/local/bin/dm.pl -> $THEOS/bin/dm.pl"
+          
+          # Wait a moment for files to be fully written
+          sleep 1
+          
+          # Find dm.pl (it might be a symlink, so use -e instead of -f)
+          DM_PL_PATH=""
+          if [ -e "$THEOS/bin/dm.pl" ]; then
+            DM_PL_PATH="$THEOS/bin/dm.pl"
+            echo "✓ Found dm.pl at $DM_PL_PATH"
+          elif [ -e "$THEOS/vendor/dm.pl/dm.pl" ]; then
+            DM_PL_PATH="$THEOS/vendor/dm.pl/dm.pl"
+            echo "✓ Found dm.pl at $DM_PL_PATH"
           else
-            echo "Warning: dm.pl not found, checking alternative locations..."
-            find $THEOS -name "dm.pl" 2>/dev/null || echo "dm.pl not found in Theos"
+            echo "⚠ Searching for dm.pl..."
+            DM_PL_PATH=$(find $THEOS -name "dm.pl" -type f 2>/dev/null | head -1)
+            if [ -n "$DM_PL_PATH" ]; then
+              echo "✓ Found dm.pl at $DM_PL_PATH"
+            else
+              echo "✗ ERROR: dm.pl not found in Theos!"
+              exit 1
+            fi
+          fi
+          
+          # Make dm.pl executable
+          chmod +x "$DM_PL_PATH"
+          echo "✓ Made $DM_PL_PATH executable"
+          
+          # If dm.pl is not in bin/, create symlink in bin/
+          if [ "$DM_PL_PATH" != "$THEOS/bin/dm.pl" ]; then
+            mkdir -p "$THEOS/bin"
+            ln -sf "$DM_PL_PATH" "$THEOS/bin/dm.pl"
+            echo "✓ Created symlink: $THEOS/bin/dm.pl -> $DM_PL_PATH"
+          fi
+          
+          # Create symlink in /usr/local/bin so Xcode's make can find it
+          sudo mkdir -p /usr/local/bin
+          sudo rm -f /usr/local/bin/dm.pl
+          sudo ln -sf "$THEOS/bin/dm.pl" /usr/local/bin/dm.pl
+          echo "✓ Created symlink: /usr/local/bin/dm.pl -> $THEOS/bin/dm.pl"
+          
+          # Verify final setup
+          if [ -e "$THEOS/bin/dm.pl" ] && [ -x "$THEOS/bin/dm.pl" ]; then
+            echo "✓ Setup complete: dm.pl is ready at $THEOS/bin/dm.pl"
+          else
+            echo "✗ ERROR: dm.pl setup failed!"
+            exit 1
           fi
       
       - name: Build with THEBOOTSTRAP=1 (Standalone App)
@@ -59,57 +94,59 @@ jobs:
           # Set THEOS from environment
           export THEOS=${{ env.THEOS }}
           
-          # Ensure dm.pl in Theos bin is executable (do this first)
-          if [ -f "$THEOS/bin/dm.pl" ]; then
-            chmod +x "$THEOS/bin/dm.pl"
-            echo "✓ Made $THEOS/bin/dm.pl executable"
-          else
+          # Verify dm.pl exists (use -e to check both files and symlinks)
+          if [ ! -e "$THEOS/bin/dm.pl" ]; then
             echo "✗ ERROR: $THEOS/bin/dm.pl not found!"
+            echo "Searching for dm.pl..."
+            find $THEOS -name "dm.pl" 2>/dev/null || echo "dm.pl not found anywhere"
             exit 1
           fi
           
-          # Create symlink in /usr/local/bin (only if dm.pl exists)
-          sudo mkdir -p /usr/local/bin
-          if [ -f "$THEOS/bin/dm.pl" ]; then
-            sudo rm -f /usr/local/bin/dm.pl  # Remove old symlink if exists
+          # Ensure dm.pl is executable
+          chmod +x "$THEOS/bin/dm.pl"
+          echo "✓ Verified dm.pl is executable at $THEOS/bin/dm.pl"
+          
+          # Verify symlink in /usr/local/bin exists
+          if [ ! -e /usr/local/bin/dm.pl ]; then
+            echo "⚠ Warning: /usr/local/bin/dm.pl not found, recreating..."
+            sudo mkdir -p /usr/local/bin
             sudo ln -sf "$THEOS/bin/dm.pl" /usr/local/bin/dm.pl
-            if [ -L /usr/local/bin/dm.pl ]; then
-              echo "✓ Created symlink: /usr/local/bin/dm.pl -> $THEOS/bin/dm.pl"
-            else
-              echo "⚠ Warning: Symlink creation may have failed, but continuing..."
-            fi
           fi
           
           # Add Theos bin and /usr/local/bin to PATH so dm.pl can be found
-          export PATH="/usr/local/bin:$THEOS/bin:$PATH"
+          export PATH="$THEOS/bin:/usr/local/bin:$PATH"
           
           # Verify dm.pl is accessible
-          echo "Checking for dm.pl..."
+          echo "Verifying dm.pl accessibility..."
+          if [ -x "$THEOS/bin/dm.pl" ]; then
+            echo "✓ dm.pl is executable at $THEOS/bin/dm.pl"
+          else
+            echo "✗ ERROR: dm.pl is not executable!"
+            exit 1
+          fi
+          
           if which dm.pl >/dev/null 2>&1; then
             echo "✓ dm.pl found in PATH: $(which dm.pl)"
           else
-            echo "⚠ dm.pl not in PATH, but will use direct path"
-          fi
-          
-          if [ -f "$THEOS/bin/dm.pl" ]; then
-            echo "✓ dm.pl exists at $THEOS/bin/dm.pl"
-          else
-            echo "✗ ERROR: dm.pl not found at $THEOS/bin/dm.pl"
-            exit 1
+            echo "⚠ dm.pl not in PATH, but will use direct path: $THEOS/bin/dm.pl"
           fi
           
           # Test dm.pl directly using full path (most reliable)
           if "$THEOS/bin/dm.pl" --version >/dev/null 2>&1; then
             echo "✓ dm.pl works via direct path!"
           else
-            echo "⚠ dm.pl test failed, but continuing..."
+            echo "⚠ dm.pl test failed, but continuing with build..."
           fi
           
-          echo "Building with THEBOOTSTRAP=1, THEOS=$THEOS, SCHEME=rootless, VERSION=2.11"
+          echo "=========================================="
+          echo "Building with THEBOOTSTRAP=1"
+          echo "THEOS=$THEOS"
+          echo "SCHEME=rootless"
+          echo "VERSION=2.12"
           echo "PATH=$PATH"
+          echo "=========================================="
           
           # Build with explicit PATH and ensure THEOS/bin is first
-          export PATH="$THEOS/bin:/usr/local/bin:$PATH"
           make clean package THEBOOTSTRAP=1
       
       - name: Create release artifacts
