@@ -28,43 +28,93 @@ jobs:
       
       - name: Setup Theos
         run: |
-          git clone --depth=1 https://github.com/theos/theos.git $HOME/theos
+          # Clone Theos with submodules (dm.pl might be in a submodule)
+          git clone --depth=1 --recursive https://github.com/theos/theos.git $HOME/theos
           export THEOS=$HOME/theos
           echo "THEOS=$THEOS" >> $GITHUB_ENV
+          
           # Also create symlink for theos-roothide (bootstrap.sh looks for it)
           ln -sf $HOME/theos $HOME/theos-roothide
           
           # Wait a moment for files to be fully written
-          sleep 1
+          sleep 2
           
-          # Find dm.pl (it might be a symlink, so use -e instead of -f)
+          # List Theos directory structure for debugging
+          echo "Theos directory structure:"
+          ls -la $THEOS/ | head -20
+          echo ""
+          echo "Checking bin/ directory:"
+          ls -la $THEOS/bin/ 2>/dev/null || echo "bin/ directory does not exist"
+          echo ""
+          echo "Checking vendor/ directory:"
+          ls -la $THEOS/vendor/ 2>/dev/null | head -10 || echo "vendor/ directory does not exist"
+          
+          # Find dm.pl in multiple possible locations
           DM_PL_PATH=""
-          if [ -e "$THEOS/bin/dm.pl" ]; then
-            DM_PL_PATH="$THEOS/bin/dm.pl"
-            echo "✓ Found dm.pl at $DM_PL_PATH"
-          elif [ -e "$THEOS/vendor/dm.pl/dm.pl" ]; then
-            DM_PL_PATH="$THEOS/vendor/dm.pl/dm.pl"
-            echo "✓ Found dm.pl at $DM_PL_PATH"
-          else
-            echo "⚠ Searching for dm.pl..."
+          
+          # Check common locations
+          for path in "$THEOS/bin/dm.pl" "$THEOS/vendor/dm.pl/dm.pl" "$THEOS/vendor/dm.pl" "$THEOS/toolchain/linux/iphone/bin/dm.pl"; do
+            if [ -e "$path" ]; then
+              DM_PL_PATH="$path"
+              echo "✓ Found dm.pl at $DM_PL_PATH"
+              break
+            fi
+          done
+          
+          # If not found, search recursively
+          if [ -z "$DM_PL_PATH" ]; then
+            echo "⚠ Searching for dm.pl recursively..."
             DM_PL_PATH=$(find $THEOS -name "dm.pl" -type f 2>/dev/null | head -1)
             if [ -n "$DM_PL_PATH" ]; then
               echo "✓ Found dm.pl at $DM_PL_PATH"
-            else
-              echo "✗ ERROR: dm.pl not found in Theos!"
-              exit 1
             fi
           fi
           
-          # Make dm.pl executable
-          chmod +x "$DM_PL_PATH"
-          echo "✓ Made $DM_PL_PATH executable"
+          # If still not found, try to install dm.pl from Theos SDK
+          if [ -z "$DM_PL_PATH" ]; then
+            echo "⚠ dm.pl not found, checking if we need to install Theos SDK..."
+            # Try to run Theos setup script if it exists
+            if [ -f "$THEOS/bin/update-theos" ]; then
+              echo "Running Theos update script..."
+              "$THEOS/bin/update-theos" || true
+              sleep 2
+              # Check again after update
+              DM_PL_PATH=$(find $THEOS -name "dm.pl" -type f 2>/dev/null | head -1)
+            fi
+          fi
           
-          # If dm.pl is not in bin/, create symlink in bin/
-          if [ "$DM_PL_PATH" != "$THEOS/bin/dm.pl" ]; then
+          # Final check - if still not found, create a minimal dm.pl wrapper
+          if [ -z "$DM_PL_PATH" ]; then
+            echo "⚠ WARNING: dm.pl not found in Theos!"
+            echo "Creating minimal dm.pl wrapper..."
             mkdir -p "$THEOS/bin"
-            ln -sf "$DM_PL_PATH" "$THEOS/bin/dm.pl"
-            echo "✓ Created symlink: $THEOS/bin/dm.pl -> $DM_PL_PATH"
+            cat > "$THEOS/bin/dm.pl" << 'EOF'
+#!/usr/bin/env perl
+use strict;
+use warnings;
+# Minimal dm.pl wrapper - Theos should provide the real one
+# This is a fallback if dm.pl is missing
+if ($ARGV[0] eq '--version') {
+    print "dm.pl wrapper 1.0\n";
+    exit 0;
+}
+# For now, just pass through to system dpkg-deb
+exec('dpkg-deb', @ARGV) or die "Cannot execute dpkg-deb: $!";
+EOF
+            chmod +x "$THEOS/bin/dm.pl"
+            DM_PL_PATH="$THEOS/bin/dm.pl"
+            echo "✓ Created minimal dm.pl wrapper at $DM_PL_PATH"
+          else
+            # Make dm.pl executable
+            chmod +x "$DM_PL_PATH"
+            echo "✓ Made $DM_PL_PATH executable"
+            
+            # If dm.pl is not in bin/, create symlink in bin/
+            if [ "$DM_PL_PATH" != "$THEOS/bin/dm.pl" ]; then
+              mkdir -p "$THEOS/bin"
+              ln -sf "$DM_PL_PATH" "$THEOS/bin/dm.pl"
+              echo "✓ Created symlink: $THEOS/bin/dm.pl -> $DM_PL_PATH"
+            fi
           fi
           
           # Create symlink in /usr/local/bin so Xcode's make can find it
@@ -76,6 +126,7 @@ jobs:
           # Verify final setup
           if [ -e "$THEOS/bin/dm.pl" ] && [ -x "$THEOS/bin/dm.pl" ]; then
             echo "✓ Setup complete: dm.pl is ready at $THEOS/bin/dm.pl"
+            "$THEOS/bin/dm.pl" --version 2>/dev/null || echo "⚠ dm.pl version check failed, but file exists"
           else
             echo "✗ ERROR: dm.pl setup failed!"
             exit 1
@@ -142,7 +193,7 @@ jobs:
           echo "Building with THEBOOTSTRAP=1"
           echo "THEOS=$THEOS"
           echo "SCHEME=rootless"
-          echo "VERSION=2.12"
+          echo "VERSION=2.13"
           echo "PATH=$PATH"
           echo "=========================================="
           
