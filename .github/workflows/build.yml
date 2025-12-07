@@ -58,25 +58,59 @@ jobs:
         run: |
           # Set THEOS from environment
           export THEOS=${{ env.THEOS }}
-          # Create symlink in /usr/local/bin in this step (not in previous step)
+          
+          # Ensure dm.pl in Theos bin is executable (do this first)
+          if [ -f "$THEOS/bin/dm.pl" ]; then
+            chmod +x "$THEOS/bin/dm.pl"
+            echo "✓ Made $THEOS/bin/dm.pl executable"
+          else
+            echo "✗ ERROR: $THEOS/bin/dm.pl not found!"
+            exit 1
+          fi
+          
+          # Create symlink in /usr/local/bin (only if dm.pl exists)
           sudo mkdir -p /usr/local/bin
-          sudo ln -sf "$THEOS/bin/dm.pl" /usr/local/bin/dm.pl
-          sudo chmod +x /usr/local/bin/dm.pl
-          # Also ensure dm.pl in Theos bin is executable
-          chmod +x "$THEOS/bin/dm.pl" 2>/dev/null || true
+          if [ -f "$THEOS/bin/dm.pl" ]; then
+            sudo rm -f /usr/local/bin/dm.pl  # Remove old symlink if exists
+            sudo ln -sf "$THEOS/bin/dm.pl" /usr/local/bin/dm.pl
+            if [ -L /usr/local/bin/dm.pl ]; then
+              echo "✓ Created symlink: /usr/local/bin/dm.pl -> $THEOS/bin/dm.pl"
+            else
+              echo "⚠ Warning: Symlink creation may have failed, but continuing..."
+            fi
+          fi
+          
           # Add Theos bin and /usr/local/bin to PATH so dm.pl can be found
           export PATH="/usr/local/bin:$THEOS/bin:$PATH"
-          # Verify dm.pl is accessible from multiple locations
+          
+          # Verify dm.pl is accessible
           echo "Checking for dm.pl..."
-          which dm.pl && echo "✓ dm.pl found in PATH: $(which dm.pl)" || echo "✗ dm.pl not in PATH"
-          ls -la $THEOS/bin/dm.pl && echo "✓ dm.pl exists at $THEOS/bin/dm.pl" || echo "✗ dm.pl not found"
-          ls -la /usr/local/bin/dm.pl && echo "✓ dm.pl symlink exists at /usr/local/bin/dm.pl" || echo "✗ dm.pl symlink not found"
-          # Test dm.pl directly
-          dm.pl --version 2>/dev/null && echo "✓ dm.pl works!" || $THEOS/bin/dm.pl --version 2>/dev/null && echo "✓ dm.pl works via direct path!" || echo "✗ dm.pl test failed"
-          echo "Building with THEBOOTSTRAP=1, THEOS=$THEOS, SCHEME=rootless, VERSION=2.10"
+          if which dm.pl >/dev/null 2>&1; then
+            echo "✓ dm.pl found in PATH: $(which dm.pl)"
+          else
+            echo "⚠ dm.pl not in PATH, but will use direct path"
+          fi
+          
+          if [ -f "$THEOS/bin/dm.pl" ]; then
+            echo "✓ dm.pl exists at $THEOS/bin/dm.pl"
+          else
+            echo "✗ ERROR: dm.pl not found at $THEOS/bin/dm.pl"
+            exit 1
+          fi
+          
+          # Test dm.pl directly using full path (most reliable)
+          if "$THEOS/bin/dm.pl" --version >/dev/null 2>&1; then
+            echo "✓ dm.pl works via direct path!"
+          else
+            echo "⚠ dm.pl test failed, but continuing..."
+          fi
+          
+          echo "Building with THEBOOTSTRAP=1, THEOS=$THEOS, SCHEME=rootless, VERSION=2.11"
           echo "PATH=$PATH"
-          # Export PATH to make so it can find dm.pl
-          make clean package THEBOOTSTRAP=1 PATH="$PATH"
+          
+          # Build with explicit PATH and ensure THEOS/bin is first
+          export PATH="$THEOS/bin:/usr/local/bin:$PATH"
+          make clean package THEBOOTSTRAP=1
       
       - name: Create release artifacts
         run: |
