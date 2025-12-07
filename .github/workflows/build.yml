@@ -22,15 +22,23 @@ jobs:
           git clone --depth=1 https://github.com/theos/theos.git $HOME/theos
           export THEOS=$HOME/theos
           echo "THEOS=$THEOS" >> $GITHUB_ENV
+          # Also create symlink for theos-roothide (bootstrap.sh looks for it)
+          ln -sf $HOME/theos $HOME/theos-roothide
       
       - name: Build with THEBOOTSTRAP=1 (Standalone App)
         run: |
+          # Source bootstrap.sh to set environment variables
           source devkit/bootstrap.sh
+          # Override THEOS if bootstrap.sh set it to non-existent path
+          if [ ! -d "$THEOS" ]; then
+            export THEOS=$HOME/theos
+          fi
           export FINALPACKAGE=1
           # Ensure THEBOOTSTRAP is set and exported
           export THEBOOTSTRAP=1
+          echo "THEOS=$THEOS" >> $GITHUB_ENV
           echo "THEBOOTSTRAP=$THEBOOTSTRAP" >> $GITHUB_ENV
-          echo "Building with THEBOOTSTRAP=1"
+          echo "Building with THEBOOTSTRAP=1, THEOS=$THEOS"
           make clean package THEBOOTSTRAP=1
       
       - name: Create release artifacts
