@@ -43,24 +43,29 @@ jobs:
           fi
       
       - name: Build with THEBOOTSTRAP=1 (Standalone App)
+        env:
+          THEOS: ${{ env.THEOS }}
+          THEOS_PACKAGE_SCHEME: rootless
+          THEOS_DEVICE_IP: 127.0.0.1
+          THEOS_DEVICE_PORT: 58422
+          THEOS_DEVICE_SIMULATOR: ""
+          THEBOOTSTRAP: 1
+          FINALPACKAGE: 1
         run: |
-          # Set environment variables for standalone app build
-          export THEOS=$HOME/theos
-          export THEOS_PACKAGE_SCHEME=rootless
-          export THEOS_DEVICE_IP=127.0.0.1
-          export THEOS_DEVICE_PORT=58422
-          export THEOS_DEVICE_SIMULATOR=
-          export THEBOOTSTRAP=1
-          export FINALPACKAGE=1
+          # Set THEOS from environment
+          export THEOS=${{ env.THEOS }}
           # Add Theos bin to PATH so dm.pl can be found
           export PATH="$THEOS/bin:$PATH"
-          echo "THEOS=$THEOS" >> $GITHUB_ENV
-          echo "THEBOOTSTRAP=$THEBOOTSTRAP" >> $GITHUB_ENV
-          echo "PATH=$PATH" >> $GITHUB_ENV
           # Verify dm.pl is accessible
-          which dm.pl || echo "dm.pl not in PATH, checking Theos bin..."
-          ls -la $THEOS/bin/dm.pl || echo "dm.pl not found in $THEOS/bin"
-          echo "Building with THEBOOTSTRAP=1, THEOS=$THEOS, SCHEME=$THEOS_PACKAGE_SCHEME"
+          echo "Checking for dm.pl..."
+          which dm.pl && echo "dm.pl found in PATH" || echo "dm.pl not in PATH"
+          ls -la $THEOS/bin/dm.pl && echo "dm.pl exists at $THEOS/bin/dm.pl" || echo "dm.pl not found"
+          # Make dm.pl executable if needed
+          chmod +x $THEOS/bin/dm.pl 2>/dev/null || true
+          # Test dm.pl directly
+          $THEOS/bin/dm.pl --version 2>/dev/null || echo "dm.pl test failed, but continuing..."
+          echo "Building with THEBOOTSTRAP=1, THEOS=$THEOS, SCHEME=rootless"
+          echo "PATH=$PATH"
           make clean package THEBOOTSTRAP=1
       
       - name: Create release artifacts
