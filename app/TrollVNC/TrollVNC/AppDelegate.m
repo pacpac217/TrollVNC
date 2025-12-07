@@ -18,10 +18,17 @@
 #import "AppDelegate.h"
 #import "TVNCHotspotManager.h"
 #import "TVNCServiceCoordinator.h"
+#import "TVNCMainViewController.h"
 
 #ifdef THEBOOTSTRAP
 #import "GitHubReleaseUpdater.h"
 #endif
+
+@interface AppDelegate ()
+
+@property (nonatomic, strong) UIWindow *window;
+
+@end
 
 @implementation AppDelegate
 
@@ -44,6 +51,19 @@
     [updater start];
 #endif
 
+    // Force standalone app mode - create window if SceneDelegate doesn't handle it
+    // This ensures app shows as standalone, not in Settings
+    if (@available(iOS 13.0, *)) {
+        // SceneDelegate will handle UI creation on iOS 13+
+    } else {
+        // Fallback for older iOS: create window directly
+        self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+        TVNCMainViewController *mainVC = [[TVNCMainViewController alloc] init];
+        UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:mainVC];
+        self.window.rootViewController = navController;
+        [self.window makeKeyAndVisible];
+    }
+    
     return YES;
 }
 

@@ -29,17 +29,25 @@
 - (void)scene:(UIScene *)scene
     willConnectToSession:(UISceneSession *)session
                  options:(UISceneConnectionOptions *)connectionOptions {
-    // Create window
+    // Force standalone app UI - don't use Settings preference
     UIWindowScene *windowScene = (UIWindowScene *)scene;
+    if (!windowScene) {
+        return;
+    }
+    
+    // Create window
     self.window = [[UIWindow alloc] initWithWindowScene:windowScene];
     
-    // Create main view controller
+    // Create main view controller (standalone UI, not Settings)
     TVNCMainViewController *mainVC = [[TVNCMainViewController alloc] init];
     UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:mainVC];
     
     // Set root view controller
     self.window.rootViewController = navController;
     [self.window makeKeyAndVisible];
+    
+    // Ensure window is on top
+    [self.window bringSubviewToFront:self.window.rootViewController.view];
 }
 
 - (void)sceneDidDisconnect:(UIScene *)scene {

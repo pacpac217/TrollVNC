@@ -30,5 +30,11 @@
 	<array>
 		<string>network-authentication</string>
 	</array>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.utilities</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>UIApplicationSupportsDocumentBrowser</key>
+	<false/>
 </dict>
 </plist>
