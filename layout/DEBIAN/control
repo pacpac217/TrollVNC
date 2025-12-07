@@ -1,6 +1,6 @@
 Package: com.82flex.trollvnc
 Name: TrollVNC
-Version: 2.12
+Version: 2.13
 Section: Applications
 Depends: firmware (>= 14.0)
 Architecture: iphoneos-arm
