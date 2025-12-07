@@ -27,7 +27,14 @@ git add .
 
 Write-Host ""
 Write-Host "💾 Đang commit..." -ForegroundColor Yellow
-$commitMessage = "Simplify settings: Keep only IP:Port configuration"
+$commitMessage = "Add standalone app UI with domain support and enable/disable toggle
+
+- Create TVNCMainViewController with custom UI (not Settings preference)
+- Add domain:port input field with IP warning
+- Add enable/disable toggle switch
+- Update SceneDelegate to load standalone app UI
+- Support domain instead of IP for 4G stability
+- All UI messages in Vietnamese"
 git commit -m $commitMessage
 
 if ($LASTEXITCODE -eq 0) {
