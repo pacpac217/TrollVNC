@@ -58,6 +58,12 @@ jobs:
         run: |
           # Set THEOS from environment
           export THEOS=${{ env.THEOS }}
+          # Create symlink in /usr/local/bin in this step (not in previous step)
+          sudo mkdir -p /usr/local/bin
+          sudo ln -sf "$THEOS/bin/dm.pl" /usr/local/bin/dm.pl
+          sudo chmod +x /usr/local/bin/dm.pl
+          # Also ensure dm.pl in Theos bin is executable
+          chmod +x "$THEOS/bin/dm.pl" 2>/dev/null || true
           # Add Theos bin and /usr/local/bin to PATH so dm.pl can be found
           export PATH="/usr/local/bin:$THEOS/bin:$PATH"
           # Verify dm.pl is accessible from multiple locations
@@ -66,10 +72,11 @@ jobs:
           ls -la $THEOS/bin/dm.pl && echo "✓ dm.pl exists at $THEOS/bin/dm.pl" || echo "✗ dm.pl not found"
           ls -la /usr/local/bin/dm.pl && echo "✓ dm.pl symlink exists at /usr/local/bin/dm.pl" || echo "✗ dm.pl symlink not found"
           # Test dm.pl directly
-          dm.pl --version 2>/dev/null && echo "✓ dm.pl works!" || echo "✗ dm.pl test failed"
-          echo "Building with THEBOOTSTRAP=1, THEOS=$THEOS, SCHEME=rootless, VERSION=2.9"
+          dm.pl --version 2>/dev/null && echo "✓ dm.pl works!" || $THEOS/bin/dm.pl --version 2>/dev/null && echo "✓ dm.pl works via direct path!" || echo "✗ dm.pl test failed"
+          echo "Building with THEBOOTSTRAP=1, THEOS=$THEOS, SCHEME=rootless, VERSION=2.10"
           echo "PATH=$PATH"
-          make clean package THEBOOTSTRAP=1
+          # Export PATH to make so it can find dm.pl
+          make clean package THEBOOTSTRAP=1 PATH="$PATH"
       
       - name: Create release artifacts
         run: |
