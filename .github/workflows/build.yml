@@ -27,19 +27,34 @@ jobs:
         run: |
           source devkit/bootstrap.sh
           export FINALPACKAGE=1
-          make clean package
+          # Ensure THEBOOTSTRAP is set and exported
+          export THEBOOTSTRAP=1
+          echo "THEBOOTSTRAP=$THEBOOTSTRAP" >> $GITHUB_ENV
+          echo "Building with THEBOOTSTRAP=1"
+          make clean package THEBOOTSTRAP=1
       
       - name: Create release artifacts
         run: |
           mkdir -p release-artifacts
+          echo "Checking for build artifacts..."
+          ls -la packages/ || echo "packages directory not found"
           # Copy .deb file
           if [ -f packages/*.deb ]; then
+            echo "Found .deb file"
             cp packages/*.deb release-artifacts/
+          else
+            echo "No .deb file found"
           fi
           # Copy .tipa file (created by after-package.sh when THEBOOTSTRAP=1)
           if [ -f packages/*.tipa ]; then
+            echo "Found .tipa file"
             cp packages/*.tipa release-artifacts/
+          else
+            echo "No .tipa file found - checking if THEBOOTSTRAP was set correctly"
+            echo "THEBOOTSTRAP was: $THEBOOTSTRAP"
           fi
+          echo "Artifacts in release-artifacts:"
+          ls -la release-artifacts/ || echo "No artifacts found"
       
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
