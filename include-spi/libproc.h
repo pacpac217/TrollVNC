@@ -31,7 +31,12 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+// Include proc_info.h with pragma to suppress C++ module import warning
+// proc_info.h includes netinet headers which are C++ modules on newer macOS
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmodule-import-in-extern-c"
 #include <sys/proc_info.h>
+#pragma clang diagnostic pop
 
 /*
  * This header file contains private interfaces to obtain process information.
