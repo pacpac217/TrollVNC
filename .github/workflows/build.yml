@@ -17,6 +17,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
+      - name: Install dependencies
+        run: |
+          # Install Homebrew if not already installed
+          if ! command -v brew &> /dev/null; then
+            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          fi
+          # Install required packages
+          brew install perl dpkg ldid
+      
       - name: Setup Theos
         run: |
           git clone --depth=1 https://github.com/theos/theos.git $HOME/theos
@@ -24,6 +33,14 @@ jobs:
           echo "THEOS=$THEOS" >> $GITHUB_ENV
           # Also create symlink for theos-roothide (bootstrap.sh looks for it)
           ln -sf $HOME/theos $HOME/theos-roothide
+          # Verify dm.pl exists
+          if [ -f "$THEOS/bin/dm.pl" ]; then
+            echo "dm.pl found at $THEOS/bin/dm.pl"
+            chmod +x "$THEOS/bin/dm.pl"
+          else
+            echo "Warning: dm.pl not found, checking alternative locations..."
+            find $THEOS -name "dm.pl" 2>/dev/null || echo "dm.pl not found in Theos"
+          fi
       
       - name: Build with THEBOOTSTRAP=1 (Standalone App)
         run: |
@@ -35,8 +52,14 @@ jobs:
           export THEOS_DEVICE_SIMULATOR=
           export THEBOOTSTRAP=1
           export FINALPACKAGE=1
+          # Add Theos bin to PATH so dm.pl can be found
+          export PATH="$THEOS/bin:$PATH"
           echo "THEOS=$THEOS" >> $GITHUB_ENV
           echo "THEBOOTSTRAP=$THEBOOTSTRAP" >> $GITHUB_ENV
+          echo "PATH=$PATH" >> $GITHUB_ENV
+          # Verify dm.pl is accessible
+          which dm.pl || echo "dm.pl not in PATH, checking Theos bin..."
+          ls -la $THEOS/bin/dm.pl || echo "dm.pl not found in $THEOS/bin"
           echo "Building with THEBOOTSTRAP=1, THEOS=$THEOS, SCHEME=$THEOS_PACKAGE_SCHEME"
           make clean package THEBOOTSTRAP=1
       
